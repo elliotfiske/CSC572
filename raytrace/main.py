@@ -41,12 +41,12 @@ class Sphere:
 	
 
 spheres = [
-	Sphere(Point(1, 0, 5), 2, Point(1.6, 2.8, 1.4), Point(1.0, 2, 0)),
+	Sphere(Point(1, 0, 5), 2, Point(0.06, 0.08, 0.04), Point(1.0, 0.5, 0.2)),
 	Sphere(Point(0, 3, 5), 0.2, Point(0, 0.5, 0.5), Point(0, 255, 0))
 ]
 
-light = Point(0, 4, 2)
-lightColor = Point(1.0, 2.0, 1.0)
+light = Point(0, 2, 7)
+lightColor = Point(1.0, 1.0, 1.0)
 
 camera = Point(0, 0, 0)
 
@@ -108,6 +108,8 @@ for x in range(0, IMG_WIDTH):
 
 		color = intersectRaySphere(rayPoint, spheres[0])
 		if color is not None:
+			color = color * 255
+			print("Final color:", str(color))
 			data[x,y] = [color.x, color.y, color.z]
 
 
