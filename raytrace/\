@@ -17,17 +17,11 @@ class Point:
 		return "{} {} {}".format(self.x, self.y, self.z)
 
 	def __mul__(self, other):
-		if isinstance(other, Point):
-			return Point(self.x * other.x, self.y * other.y, self.z * other.z)
-		else:
-			return Point(self.x * other, self.y * other, self.z * other)
-
+		print '__mul__'
+		return other
 	def __rmul__(self, other):
-		if isinstance(other, Point):
-			return Point(self.x * other.x, self.y * other.y, self.z * other.z)
-		else:
-			return Point(self.x * other, self.y * other, self.z * other)
-
+		return 
+		return other
 	def __add__(self, other):
 		return Point(self.x + other.x, self.y + other.y, self.z + other.z)
 
@@ -41,12 +35,11 @@ class Sphere:
 	
 
 spheres = [
-	Sphere(Point(1, 0, 5), 2, Point(1.6, 2.8, 1.4), Point(1.0, 2, 0)),
+	Sphere(Point(1, 0, 5), 2, Point(0.6, 0, 0), Point(255, 0, 0)),
 	Sphere(Point(0, 3, 5), 0.2, Point(0, 0.5, 0.5), Point(0, 255, 0))
 ]
 
-light = Point(0, 4, 2)
-lightColor = Point(1.0, 2.0, 1.0)
+light = Point(0, 4, 0)
 
 camera = Point(0, 0, 0)
 
@@ -83,16 +76,11 @@ def intersectRaySphere(D, sphere):
 	t0 = tca - thc
 	t1 = tca + thc
 
-	intersection = camera + t0 * D
-	N = normalize(subPoint(sphere.center, intersection))
-	lightDir = normalize(subPoint(light, intersection))
-	diff = max(dotProd(N, lightDir), 0)
-	diffuse = diff * lightColor
+	intersection = camera + 
 
-	print(diffuse)
-	color = (sphere.ambient + diffuse) * sphere.diffuse
+	color = sphere.ambient + sphere.diffuse 
 
-	return color
+	return True
 		
 # Create a 1024x1024x3 array of 8 bit unsigned integers
 data = np.zeros( (IMG_WIDTH,IMG_HEIGHT,3), dtype=np.uint8 )
@@ -106,10 +94,8 @@ for x in range(0, IMG_WIDTH):
 		rayPoint = Point(rayX, rayY, 1)
 		rayPoint = normalize(rayPoint)
 
-		color = intersectRaySphere(rayPoint, spheres[0])
-		if color is not None:
-			data[x,y] = [color.x, color.y, color.z]
-
+		if intersectRaySphere(rayPoint, spheres[0]):
+			data[x,y] = [x % 255, y % 255, (x * y) % 255]
 
 
 img = smp.toimage( data )       # Create a PIL image
