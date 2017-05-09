@@ -3,8 +3,8 @@ import numpy as np
 import scipy.misc as smp
 
 
-IMG_WIDTH = 500
-IMG_HEIGHT = 500
+IMG_WIDTH = 400
+IMG_HEIGHT = 400
 
 
 class Point:
@@ -41,11 +41,13 @@ class Sphere:
 	
 
 spheres = [
-	Sphere(Point(1, 0, 5), 2, Point(0.06, 0.08, 0.04), Point(1.0, 0.5, 0.2)),
-	Sphere(Point(0, 3, 5), 0.2, Point(0, 0.5, 0.5), Point(0, 255, 0))
+	Sphere(Point(0, 0, 7), 1, Point(0.06, 0.08, 0.04), Point(0.2, 0.9, 0.9)),
+	Sphere(Point(1, 0, 5), 0.8, Point(0.06, 0.08, 0.04), Point(0.9, 0.9, 0.9)),
+	Sphere(Point(0, -2, 2), 0.5, Point(0.06, 0.08, 0.04), Point(0.9, 0.4, 0.9)),
+	Sphere(Point(-1, 2, 5), 1, Point(0.06, 0.08, 0.04), Point(0.2, 0.2, 0.9)),
 ]
 
-light = Point(0, 2, 7)
+light = Point(1, 4, 3)
 lightColor = Point(1.0, 1.0, 1.0)
 
 camera = Point(0, 0, 0)
@@ -64,12 +66,21 @@ def dotProd(a, b):
 def normalize(vec):
 	length = magnitude(vec)
 	return Point(vec.x/length, vec.y/length, vec.z/length)
+
+def reflect(I, N):
+	return I + -2.0 * dotProd(N, I) * N
+
+def clamp(a, low, hi):
+	if a < low:
+		return low
+	if a > hi:
+		return hi
+	return a
 	
 # `d` is the unit vector of the ray
 def intersectRaySphere(D, sphere):
 	L = subPoint(sphere.center, camera)
 	tca = dotProd(L, D)
-	#	print(str(L), str(D), "tca", tca)
 
 	if tca < 0:
 		print("Should never get here", tca, str(L))
@@ -83,14 +94,25 @@ def intersectRaySphere(D, sphere):
 	t0 = tca - thc
 	t1 = tca + thc
 
-	intersection = camera + t0 * D
+	# Ambient
+	ambient = lightColor * sphere.ambient
+
+	# Diffuse
+	intersection = camera + t1 * D
 	N = normalize(subPoint(sphere.center, intersection))
 	lightDir = normalize(subPoint(light, intersection))
 	diff = max(dotProd(N, lightDir), 0)
-	diffuse = diff * lightColor
+	diffuse = lightColor * (diff * sphere.diffuse)
 
-	print(diffuse)
-	color = (sphere.ambient + diffuse) * sphere.diffuse
+	# Specular
+	viewDir = normalize(subPoint(camera, intersection))
+	reflectDir = reflect(-1 * lightDir, N)
+	spec = pow(max(dotProd(viewDir, reflectDir), 0), 32)
+	specular = 0.5 * spec * lightColor;
+
+	
+
+	color = ambient + diffuse + specular
 
 	return color
 		
@@ -106,10 +128,17 @@ for x in range(0, IMG_WIDTH):
 		rayPoint = Point(rayX, rayY, 1)
 		rayPoint = normalize(rayPoint)
 
-		color = intersectRaySphere(rayPoint, spheres[0])
+		color = None
+		sphereNdx = 0
+		while color is None and sphereNdx < len(spheres):
+			color = intersectRaySphere(rayPoint, spheres[sphereNdx])
+			sphereNdx += 1
+
 		if color is not None:
 			color = color * 255
-			print("Final color:", str(color))
+			color.x = int(min(color.x, 255))
+			color.y = int(min(color.y, 255))
+			color.z = int(min(color.z, 255))
 			data[x,y] = [color.x, color.y, color.z]
 
 
